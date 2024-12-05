@@ -1,0 +1,20 @@
+auth:
+  type: LOGIN_FORM
+  username: admin
+  password: admin
+kafka:
+  clusters:
+  - bootstrapServers: kafka:29092
+    metrics:
+      port: 9101
+      type: JMX
+    name: MODAPTO Message Bus
+    properties: {}
+    readOnly: false
+    schemaRegistry: http://schema-registry:8081
+    schemaRegistryAuth:
+      password: modapto
+      username: modapto
+rbac:
+  roles: []
+webclient: {}
