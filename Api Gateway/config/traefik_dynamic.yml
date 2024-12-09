@@ -1,0 +1,38 @@
+http:
+  middlewares:
+    modaptoAuth:
+      basicAuth:
+        users:
+          - "admin:[pass]"
+    modaptoSecHeaders:
+      headers:
+        hostsProxyHeaders: 
+          - "X-Forwarded-Host"
+        accessControlAllowMethods: "*"
+        accessControlAllowHeaders: "*"
+        stsSeconds: 63072000
+        stsIncludeSubdomains: true
+        stsPreload: true
+        forceSTSHeader: true
+        frameDeny: true 
+        contentTypeNosniff: true 
+        browserXssFilter: true 
+        referrerpolicy: "same-origin" 
+        permissionsPolicy: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), vr=()"
+        customResponseHeaders:
+          server: ""
+
+  routers:
+    traefik-api:
+      rule: "Host(`traefik.modapto.atc.gr`)"
+      service: "api@internal"
+      entryPoints: 
+        - "websecure"
+      middlewares: 
+        - "modaptoAuth"
+        - "modaptoSecHeaders"
+      tls:
+        certResolver: "letencrypt"
+
+  services:
+    autodetectContenttype: {}
