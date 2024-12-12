@@ -33,7 +33,9 @@ cd modapto-deployment/Access Control
     KEYCLOAK_ADMIN_PASSWORD=
     PGADMIN_DEFAULT_EMAIL=
     PGADMIN_DEFAULT_PASSWORD=
-    HOST_IP=localhost
+    HOST_IP=
+    MAIL_USERNAME=
+    MAIL_PASSWORD=
     ```
 
 3. Deploy Access Control from Docker Compose:
