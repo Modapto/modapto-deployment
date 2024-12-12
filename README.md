@@ -52,6 +52,12 @@ It is preferred to have a unique docker network among MODAPTO components so we c
            * -> This eventually will be a created as a docker network under the Host environment so it will be changed in "external: true"
    ```
 
+To create a new network just execute the following command in the deployment environment:
+
+  ```sh
+    docker network create --driver bridge modapto
+   ```
+
 ## License
 
 This project has received funding from the European Union's Horizon 2022 research and innovation programm, under Grant Agreement 101091996.

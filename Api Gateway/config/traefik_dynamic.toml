@@ -1,0 +1,33 @@
+[http.middlewares.simpleAuth.basicAuth]
+  users = [
+    "[user]:[hashed-password]"
+  ]
+
+  [http.middlewares.security-headers]
+    [http.middlewares.security-headers.headers]
+      hostsProxyHeaders = ["X-Forwarded-Host"]
+      stsSeconds = 63072000
+      stsIncludeSubdomains = true
+      stsPreload = true
+      forceSTSHeader = true
+      frameDeny = true
+      #customFrameOptionsValue = "allow-from https:example.com" #CSP takes care of this but may be needed for organizr. 
+      contentTypeNosniff = true 
+      browserXssFilter = true 
+      referrerpolicy = "same-origin" 
+      permissionsPolicy = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), vr=()"
+      [http.middlewares.security-headers.headers.customResponseHeaders]
+        server = ""
+
+[http.routers.api]
+  rule = "Host(`[host_path]`)"
+  entrypoints = ["websecure"]
+  middlewares = ["simpleAuth", "security-headers"]
+  service = "api@internal"
+  [http.routers.api.tls]
+    certResolver = "lets-encrypt"
+
+[log]
+  level = "DEBUG"
+
+

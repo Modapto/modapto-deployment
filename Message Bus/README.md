@@ -13,8 +13,7 @@ An initial configuration is attached for the Message Bus deployment with some of
 1. [Installation](#installation)
 2. [Deployment](#deployment)
 3. [Usage](#usage)
-4. [License](#license)
-5. [Contributors](#contributors)
+4. [Contributors](#contributors)
 
 ### Installation
 
@@ -52,12 +51,6 @@ Additionally the following services are exposed:
 1. `http://localhost:8081` -> Kafka Schema Registry to register the Data Schemas
 
 2. `http://localhost:8082` -> Kafka Rest Proxy to make HTTP requests into Kafka Cluster
-
-## License
-
-This project has received funding from the European Union's Horizon 2022 research and innovation programm, under Grant Agreement 101091996.
-
-For more details about the licence, see the [LICENSE](LICENSE) file.
 
 ## Contributors
 
