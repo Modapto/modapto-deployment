@@ -1,6 +1,6 @@
 [http.middlewares.simpleAuth.basicAuth]
   users = [
-    "[user]:[hashed-password]"
+    "admin:$apr1$3D3KQp0h$Fi9G9I2MlZr7Rul1Z0diO."
   ]
 
   [http.middlewares.security-headers]
@@ -10,7 +10,7 @@
       stsIncludeSubdomains = true
       stsPreload = true
       forceSTSHeader = true
-      frameDeny = true
+      frameDeny = true 
       #customFrameOptionsValue = "allow-from https:example.com" #CSP takes care of this but may be needed for organizr. 
       contentTypeNosniff = true 
       browserXssFilter = true 
@@ -18,16 +18,21 @@
       permissionsPolicy = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), vr=()"
       [http.middlewares.security-headers.headers.customResponseHeaders]
         server = ""
+  
+  [http.middlewares.cors.headers]
+    accessControlAllowMethods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    accessControlAllowOriginList = ["http://localhost:3000", "https://services.modapto.atc.gr"]
+    accessControlAllowHeaders = ["Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"]
+    accessControlAllowCredentials = true
+    accessControlMaxAge = 86400
 
 [http.routers.api]
-  rule = "Host(`[host_path]`)"
+  rule = "Host(`traefik.modapto.atc.gr`)"
   entrypoints = ["websecure"]
-  middlewares = ["simpleAuth", "security-headers"]
+  middlewares = ["simpleAuth", "security-headers", "cors"]
   service = "api@internal"
   [http.routers.api.tls]
     certResolver = "lets-encrypt"
 
 [log]
   level = "DEBUG"
-
-
