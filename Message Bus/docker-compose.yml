@@ -110,7 +110,7 @@ services:
   
   # Initial Topics Setup
   kafka-setup:
-    image: confluentinc/cp-kafka:${KAFKA_IMAGE_VERSION}
+    image: confluentinc/cp-kafka:7.7.1
     hostname: kafka-setup
     container_name: kafka-setup
     env_file: .env
