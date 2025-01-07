@@ -31,7 +31,7 @@ cd modapto-deployment/Message Bus
 2. Deploy Kafka Cluster from Docker Compose:
 
     ```sh
-    docker compose up -d
+    docker compose up -d --build
    ```
 
 3. After some time Kafka UI will be available on: `http://localhost:8095`.

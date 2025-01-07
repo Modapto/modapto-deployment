@@ -1,5 +1,5 @@
 services:
-  # Kafka Server Configuration
+  #Kafka Server Configuration
   kafka:
     image: confluentinc/cp-kafka:7.7.1
     hostname: kafka
@@ -61,6 +61,7 @@ services:
       - ./kafka-ui/config-single-broker.yaml:/etc/kafkaui/dynamic_config.yaml
     networks:
       - kafka
+      - modapto
 
   # Kafka Rest Proxy to handle HTTP Requests
   rest-proxy:
@@ -128,13 +129,110 @@ services:
       KAFKA_LISTENERS: 'PLAINTEXT://kafka-setup:29092'
       CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
     restart: no
-    command: |
-      bash -c '
-        /usr/local/bin/kafka-init-topics.sh
-      '
+    command:
+      - bash 
+      - -c
+      - | # Remove Windows carriage returns and grant execution permissions
+        cp /usr/local/bin/kafka-init-topics.sh /tmp/kafka-init-topics.sh && \
+        sed -i 's/\r$//' /tmp/kafka-init-topics.sh && \
+        chmod +x /tmp/kafka-init-topics.sh && \
+        /tmp/kafka-init-topics.sh
     networks:
       - kafka
-  
+
+  # Kafka Connector to support MQTT configuration
+  kafka-connect:
+    image: confluentinc/cp-kafka-connect:7.7.1
+    hostname: kafka-connect
+    container_name: kafka-connect
+    ports:
+      - "8083:8083"
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: kafka:29092
+      CONNECT_PRODUCER_BOOTSTRAP_SERVERS: kafka:29092
+      CONNECT_CONSUMER_BOOTSTRAP_SERVERS: kafka:29092
+      CONNECT_PRODUCER_SECURITY_PROTOCOL: PLAINTEXT
+      CONNECT_CONSUMER_SECURITY_PROTOCOL: PLAINTEXT 
+      CONNECT_REST_ADVERTISED_HOST_NAME: localhost
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: modapto-mqtt-connector
+      CONNECT_CONFIG_STORAGE_TOPIC: modapto-kafka-connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: modapto-kafka-connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: modapto-kafka-connect-status
+      CONNECT_KEY_CONVERTER: org.apache.kafka.connect.storage.StringConverter
+      CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      CONNECT_INTERNAL_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_INTERNAL_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_CONFLUENT_TOPIC_REPLICATION_FACTOR: 1
+      CONNECT_TOPIC_CREATION_ENABLE: 'true'
+      CONNECT_TOPIC_CREATION_DEFAULT_PARTITIONS: 6
+      CONNECT_TOPIC_CREATION_DEFAULT_REPLICATION_FACTOR: 1
+      CONNECT_PLUGIN_PATH: '/usr/share/java,/usr/share/confluent-hub-components'
+      CONNECT_CONFIG_PROVIDERS: 'env'
+      CONNECT_CONFIG_PROVIDERS_ENV_CLASS: 'org.apache.kafka.common.config.provider.EnvVarConfigProvider'
+      MQTT_USER: ${MQTT_USER}
+      MQTT_PASSWORD: ${MQTT_PASSWORD}
+    volumes:
+      - ./kafka-connect/mqtt-source-connector.json:/etc/kafka-connect/mqtt-source-connector.json
+      - kafka_connect_plugins:/usr/share/confluent-hub-components
+    networks:
+      - kafka
+    depends_on:
+      kafka:
+        condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+    command: 
+      - bash 
+      - -c 
+      - |
+        echo "Installing MQTT Connector"
+        confluent-hub install --no-prompt confluentinc/kafka-connect-mqtt:latest
+        #
+        echo "Launching Kafka Connect worker"
+        /etc/confluent/docker/run & 
+        #
+        echo "Waiting for Kafka Connect to be ready..."
+        while ! curl -s -f http://localhost:8083/connector-plugins > /dev/null; do
+          echo "Waiting for Kafka Connect to start..."
+          sleep 5
+        done
+
+        echo "Creating the MQTT connector:"
+        curl -v -X POST http://localhost:8083/connectors \
+          -H "Content-Type: application/json; charset=UTF-8" \
+          --data-binary "@/etc/kafka-connect/mqtt-source-connector.json"
+        
+        sleep infinity
+
+  # MQTT configuration
+  mosquitto:
+    image: eclipse-mosquitto:2.0.20
+    container_name: mosquitto
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - MOSQUITTO_USERNAME=${MQTT_USER}
+      - MOSQUITTO_PASSWORD=${MQTT_PASSWORD}
+    volumes:
+      - ./mqtt-config:/mosquitto/config
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+    ports:
+      - "1883:1883"
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5 mosquitto_sub -t 'test-topic' -u ${MQTT_USER} -P ${MQTT_PASSWORD} -E -v 2>&1 || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - kafka
+      - modapto
+
 networks:
   kafka:
     driver: bridge
@@ -142,6 +240,9 @@ networks:
     driver: bridge
 
 volumes:
+  mosquitto_data:
+  mosquitto_log:
   kafka-data:
   kafka-config:
   kafka-schemas:
+  kafka_connect_plugins:

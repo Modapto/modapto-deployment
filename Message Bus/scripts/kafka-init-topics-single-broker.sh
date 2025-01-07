@@ -12,7 +12,7 @@ topics=(
     "production-schedule-update"
     "delivery-delay"
     "smart-service-assignment"
-    "production_schema_registration"
+    "production-schema-registration"
     "smart-service-completion"
     "smart-service-event"
     "modapto-module-creation"
