@@ -1,0 +1,32 @@
+services:
+  eds-frontend:
+    image: stellamarkop/eds:evaluation0
+    restart: unless-stopped
+    container_name: eds-frontend
+    ports:
+      - "80"
+    environment:
+      - SERV_HOST=https://services.modapto.atc.gr
+      - SOCKET_HOST=http://localhost:4200 #server base IP for Socket.io; adjust the IP url according your host environment. Server runs under nginx proxy pass(thats why port is 4200)- we have configured in Angular to request Socket under /server subdomain.
+      - KEYCLOAK_URL=https://fvt.aegisresearch.eu
+    networks:
+      - modapto
+
+  eds-backend:
+    image: ${APP_IMAGE}
+    container_name: eds-backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - SERVER_PORT=${APP_PORT}
+      - ELASTICSEARCH_URL=${ELASTICSEARCH_URL}
+      - ELASTICSEARCH_USER=${ELASTIC_USERNAME}
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    networks:
+      - modapto
+
+networks:
+  modapto:
+    external: true
