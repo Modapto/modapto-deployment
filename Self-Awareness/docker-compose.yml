@@ -1,0 +1,14 @@
+services:
+  prognostics:
+      image: ${PROGNOSTICS_APP_IMAGE}
+      container_name: prognostics
+      restart: unless-stopped
+      env_file: .env
+      ports:
+        - ${PROGNOSTICS_APP_PORT}:${PROGNOSTICS_APP_PORT}
+      networks:
+        - modapto
+
+networks:
+  modapto:
+    external: true
