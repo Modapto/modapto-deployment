@@ -1,0 +1,14 @@
+services:
+  user-interface:
+      image: ${APP_IMAGE}
+      container_name: user-interface
+      restart: unless-stopped
+      env_file: .env
+      ports:
+        - ${APP_PORT}:80
+      networks:
+        - modapto
+
+networks:
+  modapto:
+    external: true
