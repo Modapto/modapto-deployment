@@ -6,7 +6,8 @@ echo "----------------------------------------------"
 
 # Create topics
 topics=(
-    "self-awareness"
+    "self-awareness-detection",
+    "self-awareness-diagnosis"
     "predictive-maintenance"
     "process-drift"
     "production-schedule-update"
@@ -16,6 +17,7 @@ topics=(
     "smart-service-completion"
     "smart-service-event"
     "modapto-module-creation"
+    "modapto-mqtt-topics"
 )
 
 for topic in "${topics[@]}"; do
