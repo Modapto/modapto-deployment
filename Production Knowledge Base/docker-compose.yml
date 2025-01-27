@@ -22,7 +22,6 @@ services:
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     init: true
-    container_name: elasticsearch-setup
     volumes:
       - ./setup/entrypoint.sh:/entrypoint.sh:ro,Z
       - ./setup/lib.sh:/lib.sh:ro,Z
@@ -38,13 +37,10 @@ services:
       BEATS_SYSTEM_PASSWORD: ${BEATS_SYSTEM_PASSWORD:-}
     networks:
       - elk
-      - modapto
     depends_on:
       - elasticsearch
 
   elasticsearch:
-    image: stellamarkop/pkb:elasticsearch
-    container_name: elasticsearch
     build:
       context: elasticsearch/
       args:
@@ -56,7 +52,6 @@ services:
       - 9200:9200
       - 9300:9300
     environment:
-      xpack.security.enabled: true
       node.name: elasticsearch
       ES_JAVA_OPTS: -Xms512m -Xmx512m
       # Bootstrap password.
@@ -68,12 +63,9 @@ services:
       discovery.type: single-node
     networks:
       - elk
-      - modapto
     restart: unless-stopped
 
   logstash:
-    image: stellamarkop/pkb:logstash
-    container_name: logstash
     build:
       context: logstash/
       args:
@@ -91,14 +83,11 @@ services:
       LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
     networks:
       - elk
-      - modapto
     depends_on:
       - elasticsearch
     restart: unless-stopped
 
   kibana:
-    image: stellamarkop/pkb:kibana
-    container_name: kibana
     build:
       context: kibana/
       args:
@@ -111,7 +100,6 @@ services:
       KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
     networks:
       - elk
-      - modapto
     depends_on:
       - elasticsearch
     restart: unless-stopped
@@ -119,8 +107,6 @@ services:
 networks:
   elk:
     driver: bridge
-  modapto:
-    external: true
 
 volumes:
   elasticsearch:

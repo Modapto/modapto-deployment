@@ -1,0 +1,19 @@
+services:
+  orchestrator:
+      image: ${APP_IMAGE}
+      container_name: orchestrator
+      restart: unless-stopped
+      env_file: .env
+      volumes:
+        - msc-data:/opt/msc-data/
+      ports:
+        - ${APP_PORT}:${APP_PORT}
+      networks:
+        - modapto
+
+networks:
+  modapto:
+    external: true
+
+volumes:
+  msc-data:
