@@ -293,9 +293,9 @@ services:
   ###################################################
   # Service Catalogue - Orchestrator Components
   ###################################################
-  orchestrator:
+  orchestrator-with-service-catalogue:
     image: ${APP_IMAGE}
-    container_name: orchestrator
+    container_name: orchestrator-with-service-catalogue
     restart: unless-stopped
     env_file: .env
     volumes:
