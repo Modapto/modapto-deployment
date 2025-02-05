@@ -9,6 +9,9 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "9092:9092"
+      - "1883:1883"
+      - "8888:8888"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./api-gateway/config/traefik.toml:/traefik.toml
@@ -16,6 +19,12 @@ services:
       - ./api-gateway/certs/acme.json:/acme.json
     networks:
       - modapto
+    healthcheck:
+      test: ["CMD", "wget", "http://localhost:8888/ping"]
+      interval: 20s
+      timeout: 10s
+      retries: 3
+
   ###################################################
   # Access Control Component
   ###################################################
@@ -66,6 +75,8 @@ services:
       - ${KEYCLOAK_EXPOSE_PORT}:${KEYCLOAK_SERVER_PORT}
     depends_on:
       postgres_db:
+        condition: service_healthy
+      traefik:
         condition: service_healthy
     labels:
       - traefik.enable=true
@@ -123,6 +134,8 @@ services:
     depends_on:
       keycloak:
         condition: service_healthy
+      traefik:
+        condition: service_healthy
     networks:
       - modapto
       - keycloak
@@ -172,6 +185,11 @@ services:
       ES_JAVA_OPTS: -Xms512m -Xmx512m
       ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
       discovery.type: single-node
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs -u ${ELASTIC_USERNAME}:${ELASTIC_PASSWORD} http://localhost:9200/_cluster/health?wait_for_status=yellow || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     networks:
       - elk
       - modapto
@@ -206,7 +224,10 @@ services:
       - elk
       - modapto
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
+      traefik:
+        condition: service_healthy
     restart: unless-stopped
 
   kibana:
@@ -233,7 +254,10 @@ services:
       - elk
       - modapto
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
+      traefik:
+        condition: service_healthy
     restart: unless-stopped
 
   ###################################################
@@ -254,6 +278,7 @@ services:
       - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
       - USER_MANAGER_URL=http://user-manager:${AC_APP_PORT}
       - KAFKA_BROKERS_URL=kafka:${KAFKA_EXTERNAL_PORT}
+      - KAFKA_TOPICS=${KAFKA_SUB_TOPICS}
     ports:
       - ${NC_APP_PORT}:${NC_APP_PORT}
     labels:
@@ -265,6 +290,11 @@ services:
         - traefik.http.middlewares.securityHeader.headers.sslredirect=true
         - traefik.http.routers.notification-center.middlewares=securityHeader
         - traefik.http.services.notification-center.loadbalancer.server.port=${NC_APP_PORT}
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      traefik:
+        condition: service_healthy
     networks:
       - modapto
 
@@ -287,6 +317,9 @@ services:
       - traefik.http.middlewares.securityHeader.headers.sslredirect=true
       - traefik.http.routers.user-interface.middlewares=securityHeader
       - traefik.http.services.user-interface.loadbalancer.server.port=80
+    depends_on:
+      traefik:
+        condition: service_healthy
     networks:
       - modapto
 
@@ -311,6 +344,9 @@ services:
       - traefik.http.middlewares.securityHeader.headers.sslredirect=true
       - traefik.http.routers.orchestrator.middlewares=securityHeader
       - traefik.http.services.orchestrator.loadbalancer.server.port=8080
+    depends_on:
+      traefik:
+        condition: service_healthy
     networks:
       - modapto
 
@@ -336,8 +372,15 @@ services:
         - traefik.http.middlewares.securityHeader.headers.sslredirect=true
         - traefik.http.routers.digital-twin.middlewares=securityHeader
         - traefik.http.services.digital-twin.loadbalancer.server.port=${DT_APP_IMAGE}
+    depends_on:
+      traefik:
+        condition: service_healthy
     networks:
       - modapto
+
+  ###################################################
+  # DT Management Component
+  ###################################################
 
   ###################################################
   # Evaluation Decision Support Component
@@ -361,6 +404,11 @@ services:
       - traefik.http.middlewares.securityHeader.headers.sslredirect=true
       - traefik.http.routers.eds-frontend.middlewares=securityHeader
       - traefik.http.services.eds-frontend.loadbalancer.server.port=80
+    depends_on:
+      traefik:
+        condition: service_healthy
+      eds-backend:
+        condition: service_started
     networks:
       - modapto
 
@@ -385,6 +433,9 @@ services:
       - traefik.http.middlewares.securityHeader.headers.sslredirect=true
       - traefik.http.routers.eds-backend.middlewares=securityHeader
       - traefik.http.services.eds-backend.loadbalancer.server.port=${EDS_APP_PORT}
+    depends_on:
+      traefik:
+        condition: service_healthy
     networks:
       - modapto
 
@@ -402,7 +453,6 @@ services:
       - kafka-schemas:/etc/schema-registr
     ports:
       - "29092:29092"
-      - "${KAFKA_EXTERNAL_PORT}:${KAFKA_EXTERNAL_PORT}"
       - "9101:9101"
     environment:
       KAFKA_NODE_ID: 1
@@ -424,19 +474,20 @@ services:
       CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
     labels:
       - traefik.enable=true
-      - traefik.http.routers.kafka=true
-      - traefik.http.routers.kafka.rule=Host(`${KAFKA_GATEWAY_URL}`)
-      - traefik.http.routers.kafka.tls=true
-      - traefik.http.routers.kafka.tls.certresolver=lets-encrypt
-      - traefik.http.middlewares.securityHeader.headers.sslredirect=true
-      - traefik.http.routers.kafka.middlewares=securityHeader
-      - traefik.http.services.kafka.loadbalancer.server.port=${KAFKA_EXTERNAL_PORT}
+      - traefik.tcp.routers.kafka.rule=HostSNI(`${KAFKA_GATEWAY_URL}`)
+      - traefik.tcp.routers.kafka.entrypoints=kafka
+      - traefik.tcp.routers.kafka.tls=true
+      - traefik.tcp.routers.kafka.tls.certresolver=lets-encrypt
+      - traefik.tcp.services.kafka.loadbalancer.server.port=${KAFKA_EXTERNAL_PORT}
     healthcheck:
       test: kafka-topics --bootstrap-server=kafka:${KAFKA_INTERNAL_PORT} --list || exit 1
       interval: 5s
       timeout: 10s
       retries: 20
       start_period: 15s
+    depends_on:
+      traefik:
+        condition: service_healthy
     networks:
       - kafka
       - modapto
@@ -470,6 +521,8 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
+      traefik:
+        condition: service_healthy
       schema-registry:
         condition: service_started
     volumes:
@@ -485,6 +538,8 @@ services:
     env_file: .env
     depends_on:
       kafka:
+        condition: service_healthy
+      traefik:
         condition: service_healthy
     ports:
       - ${RP_EXTERNAL_PORT}:${RP_EXTERNAL_PORT}
@@ -643,8 +698,6 @@ services:
       - ./message-bus/mqtt-config:/mosquitto/config
       - mosquitto_data:/mosquitto/data
       - mosquitto_log:/mosquitto/log
-    ports:
-      - "${MQTT_PORT}:${MQTT_PORT}"
     healthcheck:
       test: ["CMD-SHELL", "timeout 5 mosquitto_sub -t 'test-topic' -u ${MQTT_USER} -P ${MQTT_PASSWORD} -E -v 2>&1 || exit 1"]
       interval: 20s
@@ -653,13 +706,14 @@ services:
       start_period: 10s
     labels:
       - traefik.enable=true
-      - traefik.http.routers.mosquitto=true
-      - traefik.http.routers.mosquitto.rule=Host(`${MQTT_GATEWAY_URL}`)
-      - traefik.http.routers.mosquitto.tls=true
-      - traefik.http.routers.mosquitto.tls.certresolver=lets-encrypt
-      - traefik.http.middlewares.securityHeader.headers.sslredirect=true
-      - traefik.http.routers.mosquitto.middlewares=securityHeader
-      - traefik.http.services.mosquitto.loadbalancer.server.port=${MQTT_PORT}
+      - traefik.tcp.routers.mosquitto.rule=HostSNI(`${MQTT_GATEWAY_URL}`)
+      - traefik.tcp.routers.mosquitto.entrypoints=mqtt
+      - traefik.tcp.routers.mosquitto.tls=true
+      - traefik.tcp.routers.mosquitto.tls.certresolver=lets-encrypt
+      - traefik.tcp.services.mosquitto.loadbalancer.server.port=${MQTT_PORT}
+    depends_on:
+      traefik:
+        condition: service_healthy
     networks:
       - kafka
       - modapto
@@ -679,7 +733,7 @@ networks:
   keycloak:
     driver: bridge
   modapto:
-    driver: bridge
+    external: true
   elk:
     driver: bridge
   kafka:
