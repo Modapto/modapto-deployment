@@ -5,6 +5,7 @@ services:
   traefik:
     image: traefik:v2.9
     container_name: traefik
+    profiles: ["proxy"]
     restart: unless-stopped
     ports:
       - "80:80"
@@ -76,8 +77,6 @@ services:
     depends_on:
       postgres_db:
         condition: service_healthy
-      traefik:
-        condition: service_healthy
     labels:
       - traefik.enable=true
       - traefik.http.routers.keycloak=true
@@ -134,8 +133,6 @@ services:
     depends_on:
       keycloak:
         condition: service_healthy
-      traefik:
-        condition: service_healthy
     networks:
       - modapto
       - keycloak
@@ -144,10 +141,12 @@ services:
   # Production Knowledge Base Component
   ###################################################
   setup:
+    container_name: elasticsearch-setup
     profiles:
       - setup
     build:
-      context: setup/
+      context: ./production-knowledge-base/
+      dockerfile: ./setup/Dockerfile
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     init: true
@@ -170,8 +169,10 @@ services:
       - elasticsearch
 
   elasticsearch:
+    container_name: elasticsearch
     build:
-      context: elasticsearch/
+      context: ./production-knowledge-base/
+      dockerfile: ./elasticsearch/Dockerfile
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     volumes:
@@ -196,8 +197,10 @@ services:
     restart: unless-stopped
 
   logstash:
+    container_name: logstash
     build:
-      context: logstash/
+      context: ./production-knowledge-base/
+      dockerfile: ./logstash/Dockerfile
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     volumes:
@@ -226,17 +229,17 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
-      traefik:
-        condition: service_healthy
     restart: unless-stopped
 
   kibana:
+    container_name: kibana
     build:
-      context: kibana/
+      context: ./production-knowledge-base/
+      dockerfile: ./kibana/Dockerfile
       args:
         ELASTIC_VERSION: ${ELASTIC_VERSION}
     volumes:
-      - ./production-knowledge-base/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
+      -  ./production-knowledge-base/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml:ro,Z
     ports:
       - 5601:5601
     environment:
@@ -255,8 +258,6 @@ services:
       - modapto
     depends_on:
       elasticsearch:
-        condition: service_healthy
-      traefik:
         condition: service_healthy
     restart: unless-stopped
 
@@ -293,7 +294,7 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
-      traefik:
+      kafka:
         condition: service_healthy
     networks:
       - modapto
@@ -317,9 +318,6 @@ services:
       - traefik.http.middlewares.securityHeader.headers.sslredirect=true
       - traefik.http.routers.user-interface.middlewares=securityHeader
       - traefik.http.services.user-interface.loadbalancer.server.port=80
-    depends_on:
-      traefik:
-        condition: service_healthy
     networks:
       - modapto
 
@@ -327,7 +325,7 @@ services:
   # Service Catalogue - Orchestrator Components
   ###################################################
   orchestrator-with-service-catalogue:
-    image: ${APP_IMAGE}
+    image: ${OSC_APP_IMAGE}
     container_name: orchestrator-with-service-catalogue
     restart: unless-stopped
     env_file: .env
@@ -344,37 +342,6 @@ services:
       - traefik.http.middlewares.securityHeader.headers.sslredirect=true
       - traefik.http.routers.orchestrator.middlewares=securityHeader
       - traefik.http.services.orchestrator.loadbalancer.server.port=8080
-    depends_on:
-      traefik:
-        condition: service_healthy
-    networks:
-      - modapto
-
-  ###################################################
-  # Digital Twin Component
-  ###################################################
-  digital-twin:
-    image: ${DT_APP_IMAGE}
-    restart: unless-stopped
-    container_name: digital-twin
-    volumes:
-      - ./digital-twin/config/:/app/resources/
-    environment:
-      - faaast_config=/app/resources/config.json
-    ports:
-      - ${DT_APP_IMAGE}:${DT_APP_IMAGE}
-    labels:
-        - traefik.enable=true
-        - traefik.http.routers.digital-twin=true
-        - traefik.http.routers.digital-twin.rule=Host(`${DIGITAL_TWIN_GATEWAY_URL}`)
-        - traefik.http.routers.digital-twin.tls=true
-        - traefik.http.routers.digital-twin.tls.certresolver=lets-encrypt
-        - traefik.http.middlewares.securityHeader.headers.sslredirect=true
-        - traefik.http.routers.digital-twin.middlewares=securityHeader
-        - traefik.http.services.digital-twin.loadbalancer.server.port=${DT_APP_IMAGE}
-    depends_on:
-      traefik:
-        condition: service_healthy
     networks:
       - modapto
 
@@ -405,8 +372,6 @@ services:
       - traefik.http.routers.eds-frontend.middlewares=securityHeader
       - traefik.http.services.eds-frontend.loadbalancer.server.port=80
     depends_on:
-      traefik:
-        condition: service_healthy
       eds-backend:
         condition: service_started
     networks:
@@ -433,9 +398,6 @@ services:
       - traefik.http.middlewares.securityHeader.headers.sslredirect=true
       - traefik.http.routers.eds-backend.middlewares=securityHeader
       - traefik.http.services.eds-backend.loadbalancer.server.port=${EDS_APP_PORT}
-    depends_on:
-      traefik:
-        condition: service_healthy
     networks:
       - modapto
 
@@ -485,9 +447,6 @@ services:
       timeout: 10s
       retries: 20
       start_period: 15s
-    depends_on:
-      traefik:
-        condition: service_healthy
     networks:
       - kafka
       - modapto
@@ -521,8 +480,6 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
-      traefik:
-        condition: service_healthy
       schema-registry:
         condition: service_started
     volumes:
@@ -538,8 +495,6 @@ services:
     env_file: .env
     depends_on:
       kafka:
-        condition: service_healthy
-      traefik:
         condition: service_healthy
     ports:
       - ${RP_EXTERNAL_PORT}:${RP_EXTERNAL_PORT}
@@ -661,7 +616,7 @@ services:
       kafka:
         condition: service_healthy
       mosquitto:
-        condition: service_healthy
+        condition: service_started
     command:
       - bash
       - -c
@@ -698,12 +653,12 @@ services:
       - ./message-bus/mqtt-config:/mosquitto/config
       - mosquitto_data:/mosquitto/data
       - mosquitto_log:/mosquitto/log
-    healthcheck:
-      test: ["CMD-SHELL", "timeout 5 mosquitto_sub -t 'test-topic' -u ${MQTT_USER} -P ${MQTT_PASSWORD} -E -v 2>&1 || exit 1"]
-      interval: 20s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+    # healthcheck:
+    #   test: ["CMD-SHELL", "timeout 5 mosquitto_sub -t 'test-topic' -u ${MQTT_USER} -P ${MQTT_PASSWORD} -E -v 2>&1 || exit 1"]
+    #   interval: 20s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 10s
     labels:
       - traefik.enable=true
       - traefik.tcp.routers.mosquitto.rule=HostSNI(`${MQTT_GATEWAY_URL}`)
@@ -711,9 +666,6 @@ services:
       - traefik.tcp.routers.mosquitto.tls=true
       - traefik.tcp.routers.mosquitto.tls.certresolver=lets-encrypt
       - traefik.tcp.services.mosquitto.loadbalancer.server.port=${MQTT_PORT}
-    depends_on:
-      traefik:
-        condition: service_healthy
     networks:
       - kafka
       - modapto
