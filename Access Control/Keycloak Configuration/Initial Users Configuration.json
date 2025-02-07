@@ -1,36 +1,4 @@
 {
   "realm" : "modapto-dev",
-  "users" : [{
-    "id" : "a918b329-6111-4a4d-b928-3780b638aa07",
-    "username" : "super_admin",
-    "firstName" : "Admin",
-    "lastName" : "Super",
-    "email" : "superadmin@admin.com",
-    "emailVerified" : true,
-    "attributes" : {
-      "pilot_role" : [ "ALL" ],
-      "pilot_code" : [ "SUPER_ADMIN" ],
-      "user_role" : [ "SUPER_ADMIN" ]
-    },
-    "createdTimestamp" : 1719578064439,
-    "enabled" : true,
-    "totp" : false,
-    "credentials" : [ {
-      "id" : "06abb7a7-f257-486c-93db-21079baf45d9",
-      "type" : "password",
-      "userLabel" : "My password",
-      "createdDate" : 1726564938631,
-      "secretData" : "{\"value\":\"cucbVjCF83VmKT7aK1j/15AE8sGpCn9EyzX9aFspzOx6V9R5QI9UnlVnkYW+pghjNE4DdwvjjEL0TfdRS7xtgQ==\",\"salt\":\"mKO2kvOBx8yGjKba6vm2ug==\",\"additionalParameters\":{}}",
-      "credentialData" : "{\"hashIterations\":210000,\"algorithm\":\"pbkdf2-sha512\",\"additionalParameters\":{}}"
-    } ],
-    "disableableCredentialTypes" : [ ],
-    "requiredActions" : [ ],
-    "realmRoles" : [ "SUPER_ADMIN", "default-roles-modapto-dev" ],
-    "clientRoles" : {
-      "realm-management" : [ "query-realms", "manage-realm", "manage-clients", "realm-admin", "manage-users", "query-users", "manage-authorization", "view-identity-providers", "view-users", "query-clients", "view-clients", "query-groups", "view-events", "view-authorization", "view-realm" ],
-      "modapto" : [ "SUPER_ADMIN" ]
-    },
-    "notBefore" : 0,
-    "groups" : [ ]
-  }]
+  "users" : [{"id":"74644215-b442-4042-ba5b-1abc6cceea8e","username":"crf_test","firstName":"CRF","lastName":"TEST","email":"crf@test.com","emailVerified":true,"attributes":{"user_role":["LOGISTICS_MANAGER"],"pilot_role":["ADMIN"],"pilot_code":["CRF"]},"createdTimestamp":1736932076625,"enabled":true,"totp":false,"disableableCredentialTypes":[],"requiredActions":[],"notBefore":1737712067,"access":{"manageGroupMembership":true,"view":true,"mapRoles":true,"impersonate":false,"manage":true}},{"id":"e4c29581-00ad-4987-8317-d05ef13687a8","username":"e.chrysikou@atc.gr","lastName":"Chrysikou","email":"e.chrysikou@atc.gr","emailVerified":true,"attributes":{"user_role":["PRODUCTION_MANAGER"],"pilot_code":["CRF"],"pilot_role":["USER"]},"createdTimestamp":1734717855577,"enabled":true,"totp":false,"disableableCredentialTypes":[],"requiredActions":[],"notBefore":1738336816,"access":{"manageGroupMembership":true,"view":true,"mapRoles":true,"impersonate":false,"manage":true}},{"id":"7a75c199-890d-4798-8579-21a49281a62d","username":"elena","firstName":"elen","lastName":"chrsk","email":"elenachrysikou@gmail.com","emailVerified":true,"attributes":{"user_role":["PLANT_OPERATOR"],"pilot_role":["ADMIN"],"pilot_code":["FFT"]},"createdTimestamp":1736419055393,"enabled":true,"totp":false,"disableableCredentialTypes":[],"requiredActions":[],"notBefore":1736435587,"access":{"manageGroupMembership":true,"view":true,"mapRoles":true,"impersonate":false,"manage":true}},{"id":"865f8812-8557-4371-9f38-23eaed13f4a7","username":"fft_test","firstName":"FFT","lastName":"TEST","email":"fft@test.com","emailVerified":true,"attributes":{"user_role":["PLANT_OPERATOR"],"pilot_role":["ADMIN"],"pilot_code":["FFT"]},"createdTimestamp":1736932118615,"enabled":true,"totp":false,"disableableCredentialTypes":[],"requiredActions":[],"notBefore":0,"access":{"manageGroupMembership":true,"view":true,"mapRoles":true,"impersonate":false,"manage":true}},{"id":"627a1f12-6b30-48ac-8d82-4c3c97869de3","username":"iltar_test","firstName":"ILTAR","lastName":"TEST","email":"iltar@test.com","emailVerified":true,"attributes":{"user_role":["AUTOMATION_MANAGER"],"pilot_role":["ADMIN"],"pilot_code":["ILTAR"]},"createdTimestamp":1736932098966,"enabled":true,"totp":false,"disableableCredentialTypes":[],"requiredActions":[],"notBefore":0,"access":{"manageGroupMembership":true,"view":true,"mapRoles":true,"impersonate":false,"manage":true}},{"id":"e3ddb5bd-f306-4ece-b8ec-6711b692fc83","username":"mariac","firstName":"Maria","lastName":"Chatziathanasiou","email":"m.chatziathanasiou@atc.gr","emailVerified":true,"attributes":{"user_role":["LOGISTICS_MANAGER"],"pilot_role":["ADMIN"],"pilot_code":["CRF"]},"createdTimestamp":1736855603779,"enabled":true,"totp":false,"disableableCredentialTypes":[],"requiredActions":[],"notBefore":0,"access":{"manageGroupMembership":true,"view":true,"mapRoles":true,"impersonate":false,"manage":true}},{"id":"fc109de8-e2f4-42c7-bb0d-e62deffd36e1","username":"myuser","firstName":"ΕΛΕΝΑ","lastName":"ΧΡΥΣΙΚΟΥ","email":"echrysikou@gmail.com","emailVerified":true,"attributes":{"user_role":["PRODUCTION_MANAGER"],"pilot_role":["USER"],"pilot_code":["CRF"]},"createdTimestamp":1736517438153,"enabled":true,"totp":false,"disableableCredentialTypes":[],"requiredActions":[],"notBefore":1736714127,"access":{"manageGroupMembership":true,"view":true,"mapRoles":true,"impersonate":false,"manage":true}},{"id":"ccc5f57b-2c97-401b-aaa9-d9f401a320da","username":"olivier","firstName":"Olivier","lastName":"JOTZ","email":"olivier.jotz@usocome.com","emailVerified":true,"attributes":{"user_role":["INNOVATION_ENGINEER"],"pilot_role":["USER"],"pilot_code":["SEW"]},"createdTimestamp":1737724312329,"enabled":true,"totp":false,"disableableCredentialTypes":[],"requiredActions":[],"notBefore":0,"access":{"manageGroupMembership":true,"view":true,"mapRoles":true,"impersonate":false,"manage":true}},{"id":"fb7931bb-b289-45f9-b48f-07f49f6323a0","username":"sew_admin","firstName":"SEW","lastName":"Admin","email":"sew@admin.com","emailVerified":true,"attributes":{"user_role":["PLANT_MANAGER"],"pilot_code":["SEW"],"pilot_role":["ADMIN"]},"createdTimestamp":1734098006177,"enabled":true,"totp":false,"disableableCredentialTypes":[],"requiredActions":[],"notBefore":0,"access":{"manageGroupMembership":true,"view":true,"mapRoles":true,"impersonate":false,"manage":true}},{"id":"988392a7-b70b-4bab-8a16-4fa065231d4c","username":"sew_test","firstName":"SEW","lastName":"TEST","email":"sew@test.com","emailVerified":true,"attributes":{"user_role":["PLANT_MANAGER"],"pilot_role":["ADMIN"],"pilot_code":["SEW"]},"createdTimestamp":1736931895372,"enabled":true,"totp":false,"disableableCredentialTypes":[],"requiredActions":[],"notBefore":1737724422,"access":{"manageGroupMembership":true,"view":true,"mapRoles":true,"impersonate":false,"manage":true}},{"id":"a918b329-6111-4a4d-b928-3780b638aa07","username":"super_admin","firstName":"Admin","lastName":"Super","email":"superadmin@admin.com","emailVerified":true,"attributes":{"user_role":["SUPER_ADMIN"],"pilot_code":["ALL"],"pilot_role":["SUPER_ADMIN"]},"createdTimestamp":1719578064439,"enabled":true,"totp":false,"disableableCredentialTypes":[],"requiredActions":[],"notBefore":1738680658,"access":{"manageGroupMembership":true,"view":true,"mapRoles":true,"impersonate":false,"manage":true}},{"id":"5ada1f32-17f5-4d04-803b-d62d018f409b","username":"t_h_robsim","firstName":"Tobias","lastName":"Hohmann","email":"tobias.hohmann@fft.de","emailVerified":true,"attributes":{"user_role":["ROBOT_SIMULATION_USER"],"activation_token":["2b94268c-36c5-41e0-b3ef-03e9540342e1"],"activation_expiry":["1737711942107"],"pilot_role":["USER"],"pilot_code":["FFT"]},"createdTimestamp":1737625542121,"enabled":false,"totp":false,"disableableCredentialTypes":[],"requiredActions":[],"notBefore":0,"access":{"manageGroupMembership":true,"view":true,"mapRoles":true,"impersonate":false,"manage":true}}]
 }

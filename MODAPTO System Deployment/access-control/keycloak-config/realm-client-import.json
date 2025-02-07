@@ -405,41 +405,9 @@
           }
         },
         {
-          "id": "ef4c8779-25d8-4b0c-acda-cb3ae0586be7",
-          "name": "PRODUCTION_USER",
-          "description": "Role for pilot 'CRF' and pilot role of 'USER'",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "bb1dd96e-87ff-4726-9cac-3ab7499a8f53",
-          "attributes": {
-            "pilot_code": [
-              "CRF"
-            ],
-            "pilot_role": [
-              "USER"
-            ]
-          }
-        },
-        {
           "id": "3e9bdee0-a827-4eae-b3b0-2ee9d585a922",
           "name": "ROBOT_PROGRAMMER",
           "description": "",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "bb1dd96e-87ff-4726-9cac-3ab7499a8f53",
-          "attributes": {
-            "pilot_code": [
-              "FFT"
-            ],
-            "pilot_role": [
-              "USER"
-            ]
-          }
-        },
-        {
-          "id": "7190f989-25bc-4c5c-828c-65a3010316bd",
-          "name": "MYROLE",
-          "description": "Role for pilot 'FFT' and pilot role of 'USER'",
           "composite": false,
           "clientRole": true,
           "containerId": "bb1dd96e-87ff-4726-9cac-3ab7499a8f53",
@@ -485,22 +453,6 @@
           }
         },
         {
-          "id": "9f26f446-cd3a-4867-bb64-eb1fb5e2475b",
-          "name": "TEST123",
-          "description": "Role for pilot 'FFT' and pilot role of 'ADMIN'",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "bb1dd96e-87ff-4726-9cac-3ab7499a8f53",
-          "attributes": {
-            "pilot_code": [
-              "FFT"
-            ],
-            "pilot_role": [
-              "ADMIN"
-            ]
-          }
-        },
-        {
           "id": "bae28e18-12a7-48e2-ad91-8489eb4aade4",
           "name": "ROBOT_SIMULATION_USER",
           "description": "",
@@ -517,22 +469,6 @@
           }
         },
         {
-          "id": "203f8b3b-7370-4092-85ed-b53b0d2b6ac4",
-          "name": "QUALITY_INSPECTOR",
-          "description": "Role for pilot 'CRF' and pilot role of 'USER'",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "bb1dd96e-87ff-4726-9cac-3ab7499a8f53",
-          "attributes": {
-            "pilot_code": [
-              "CRF"
-            ],
-            "pilot_role": [
-              "USER"
-            ]
-          }
-        },
-        {
           "id": "9b8359b1-bd52-469d-8a6a-de06dc3f26a3",
           "name": "VIRTUAL_COMMISSIONING_ENGINEER",
           "description": "",
@@ -542,22 +478,6 @@
           "attributes": {
             "pilot_code": [
               "FFT"
-            ],
-            "pilot_role": [
-              "USER"
-            ]
-          }
-        },
-        {
-          "id": "9081c14a-7bbc-449c-b173-e6aa36602783",
-          "name": "LOGISTICS_USER",
-          "description": "Role for pilot 'CRF' and pilot role of 'USER'",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "bb1dd96e-87ff-4726-9cac-3ab7499a8f53",
-          "attributes": {
-            "pilot_code": [
-              "CRF"
             ],
             "pilot_role": [
               "USER"
@@ -643,6 +563,7 @@
               "ILTAR"
             ],
             "pilot_role": [
+              "ADMIN",
               "ADMIN"
             ]
           }
@@ -694,70 +615,6 @@
             ],
             "pilot_role": [
               "USER"
-            ]
-          }
-        },
-        {
-          "id": "537732e8-6ca3-43b5-8fd5-893a7605532d",
-          "name": "PLANT_OPERATOR_TEST",
-          "description": "Role for pilot 'FFT' and pilot role of 'ADMIN'",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "bb1dd96e-87ff-4726-9cac-3ab7499a8f53",
-          "attributes": {
-            "pilot_code": [
-              "FFT"
-            ],
-            "pilot_role": [
-              "ADMIN"
-            ]
-          }
-        },
-        {
-          "id": "ce326e46-c689-4230-940f-c44da7e60425",
-          "name": "GUEST",
-          "description": "Role for pilot 'CRF' and pilot role of 'USER'",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "bb1dd96e-87ff-4726-9cac-3ab7499a8f53",
-          "attributes": {
-            "pilot_code": [
-              "CRF"
-            ],
-            "pilot_role": [
-              "USER"
-            ]
-          }
-        },
-        {
-          "id": "7099d304-1f3a-4cd1-bf33-3e5855ed3063",
-          "name": "INNOVATION_ENGINEER",
-          "description": "Role for pilot 'SEW' and pilot role of 'USER'",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "bb1dd96e-87ff-4726-9cac-3ab7499a8f53",
-          "attributes": {
-            "pilot_role": [
-              "USER"
-            ],
-            "pilot_code": [
-              "SEW"
-            ]
-          }
-        },
-        {
-          "id": "a486d415-2b72-4890-969d-821e5639318c",
-          "name": "SUPPORT_TECHNIQUE",
-          "description": "Role for pilot 'SEW' and pilot role of 'USER'",
-          "composite": false,
-          "clientRole": true,
-          "containerId": "bb1dd96e-87ff-4726-9cac-3ab7499a8f53",
-          "attributes": {
-            "pilot_role": [
-              "USER"
-            ],
-            "pilot_code": [
-              "SEW"
             ]
           }
         },

@@ -5,11 +5,11 @@
     "username" : "super_admin",
     "firstName" : "Admin",
     "lastName" : "Super",
-    "email" : "superadmin@admin.com",
+    "email" : "superadmin@modapto.eu",
     "emailVerified" : true,
     "attributes" : {
-      "pilot_role" : [ "ALL" ],
-      "pilot_code" : [ "SUPER_ADMIN" ],
+      "pilot_role" : [ "SUPER_ADMIN" ],
+      "pilot_code" : [ "ALL" ],
       "user_role" : [ "SUPER_ADMIN" ]
     },
     "createdTimestamp" : 1719578064439,
@@ -25,7 +25,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "SUPER_ADMIN", "default-roles-modapto-dev" ],
+    "realmRoles" : [ "SUPER_ADMIN", "default-roles-modapto-system" ],
     "clientRoles" : {
       "realm-management" : [ "query-realms", "manage-realm", "manage-clients", "realm-admin", "manage-users", "query-users", "manage-authorization", "view-identity-providers", "view-users", "query-clients", "view-clients", "query-groups", "view-events", "view-authorization", "view-realm" ],
       "modapto" : [ "SUPER_ADMIN" ]
