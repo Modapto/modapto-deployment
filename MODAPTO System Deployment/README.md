@@ -86,7 +86,7 @@ Additionally, its highly suggested to add the Super Admin of the System via the 
 3. Select "Realm Settings"
 4. On the Top Right corner select "Actions"
 5. Select "Partial Import"
-6. Provide either the raw JSON context of "init-user-import.json*** file or the file itself.
+6. Provide either the raw JSON context of ***init-user-import.json*** file or the file itself located under *api-gateway* directory.
 7. Selecte the User
 8. Press "Import"
 9. Change Super-Admins password in Users Tab, select the User and navigate to Credentials to setup a new password
