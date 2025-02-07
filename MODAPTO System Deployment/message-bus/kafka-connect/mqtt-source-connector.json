@@ -3,7 +3,7 @@
     "config": {
         "connector.class": "io.confluent.connect.mqtt.MqttSourceConnector",
         "tasks.max": 1,
-        "mqtt.server.uri": "tcp://mosquitto:1883",
+        "mqtt.server.uri": "${env:MQTT_URL}",
         "mqtt.username": "${env:MQTT_USER}",
         "mqtt.password": "${env:MQTT_PASSWORD}",
         "mqtt.connection.timeout": 30,
@@ -17,7 +17,7 @@
         "value.converter": "org.apache.kafka.connect.converters.ByteArrayConverter",
         "value.converter.schemas.enable": false,
         "topic.creation.enable": true,
-        "confluent.topic.bootstrap.servers": "kafka:29092",
+        "confluent.topic.bootstrap.servers": "${env:CONNECT_BOOTSTRAP_SERVERS}",
         "confluent.topic.replication.factor": 1,
         "topic.creation.default.replication.factor": 1,
         "topic.creation.default.partitions": 6

@@ -1,5 +1,19 @@
 #!/bin/bash 
 
+# MODAPTO Logo
+echo ""
+echo ""
+echo "#############################################################"
+echo "#                                                           #"
+echo "#   M     M   OOOO    DDDD    AAAA   PPPP   TTTTT   OOOO    #"
+echo "#   M M M M  O    O   D   D  A    A  P   P    T    O    O   #"
+echo "#   M  M  M  O    O   D   D  AAAAAA  PPPP     T    O    O   #"
+echo "#   M     M  O    O   D   D  A    A  P        T    O    O   #"
+echo "#   M     M   OOOO    DDDD   A    A  P        T     OOOO    #"
+echo "#                                                           #"
+echo "#############################################################"
+echo ""
+echo ""
 echo "----------------------------------------------"
 echo "Setting up MODAPTO System Deployment..."
 echo "----------------------------------------------"
@@ -39,18 +53,18 @@ fi
 # Change permissions to specified files
 echo "----------------------------------------------"
 echo "Changing permissions to essential files..."
-chmod 777 ./api-gateway/certs
-chmod 777 ./api-gateway/config
 chmod +x ./message-bus/scripts/kafka-init-topics-single-broker.sh
-chmod 700 ./message-bus/mqtt-config/passwd
+chmod 700 ./message-bus/mqtt/config/passwd
 chmod 600 ./api-gateway/certs/acme.json
 chmod +x ./production-knowledge-base/setup/entrypoint.sh
 chmod +x ./production-knowledge-base/setup/lib.sh
+echo ".."
+echo "Permissions changed successfully!"
 
 # Starting API Gateway
 echo "----------------------------------------------"
 echo "Starting API Gateway component.."
-docker compose --profile proxy up traefik
+docker compose --profile proxy up -d traefik
 
 # Setup Keycloak to create the Client Secret
 echo "----------------------------------------------"
@@ -60,4 +74,4 @@ docker compose up -d postgres_db keycloak
 # Setup ELK Stack
 echo "----------------------------------------------"
 echo "Setting up ELK Stack..."
-docker compose up setup
+docker compose up -d setup

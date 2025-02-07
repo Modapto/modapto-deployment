@@ -1,6 +1,6 @@
 {
   "id": "3731d7d3-5443-4b18-8003-cc4dc5847e3b",
-  "realm": "modapto-dev",
+  "realm": "modapto-system",
   "displayName": "",
   "displayNameHtml": "",
   "notBefore": 0,
@@ -67,7 +67,7 @@
       },
       {
         "id": "ddd8365a-4739-4546-9a65-77c9066e2b09",
-        "name": "default-roles-modapto-dev",
+        "name": "default-roles-modapto-system",
         "description": "${role_default-roles}",
         "composite": true,
         "composites": {
@@ -1031,7 +1031,7 @@
   ],
   "defaultRole": {
     "id": "ddd8365a-4739-4546-9a65-77c9066e2b09",
-    "name": "default-roles-modapto-dev",
+    "name": "default-roles-modapto-system",
     "description": "${role_default-roles}",
     "composite": true,
     "clientRole": false,
@@ -1091,7 +1091,7 @@
       "disableableCredentialTypes": [],
       "requiredActions": [],
       "realmRoles": [
-        "default-roles-modapto-dev"
+        "default-roles-modapto-system"
       ],
       "clientRoles": {
         "realm-management": [
@@ -1132,13 +1132,13 @@
       "clientId": "account",
       "name": "${client_account}",
       "rootUrl": "${authBaseUrl}",
-      "baseUrl": "/realms/modapto-dev/account/",
+      "baseUrl": "/realms/modapto-system/account/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "/realms/modapto-dev/account/*"
+        "/realms/modapto-system/account/*"
       ],
       "webOrigins": [],
       "notBefore": 0,
@@ -1176,13 +1176,13 @@
       "clientId": "account-console",
       "name": "${client_account-console}",
       "rootUrl": "${authBaseUrl}",
-      "baseUrl": "/realms/modapto-dev/account/",
+      "baseUrl": "/realms/modapto-system/account/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "/realms/modapto-dev/account/*"
+        "/realms/modapto-system/account/*"
       ],
       "webOrigins": [],
       "notBefore": 0,
@@ -1468,13 +1468,13 @@
       "clientId": "security-admin-console",
       "name": "${client_security-admin-console}",
       "rootUrl": "${authAdminUrl}",
-      "baseUrl": "/admin/modapto-dev/console/",
+      "baseUrl": "/admin/modapto-system/console/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
-        "/admin/modapto-dev/console/*"
+        "/admin/modapto-system/console/*"
       ],
       "webOrigins": [
         "+"

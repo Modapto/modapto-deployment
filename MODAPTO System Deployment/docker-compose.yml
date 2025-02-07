@@ -214,6 +214,9 @@ services:
     environment:
       LS_JAVA_OPTS: -Xms256m -Xmx256m
       LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
+      ELASTIC_USERNAME: ${ELASTIC_USERNAME}
+      MESSAGE_BUS_KAFKA_URL: kafka:${KAFKA_EXTERNAL_PORT}
+      ELASTICSEARCH_URL: ${ELASTICSEARCH_URL}
     labels:
       - traefik.enable=true
       - traefik.http.routers.logstash=true
@@ -296,6 +299,8 @@ services:
         condition: service_healthy
       kafka:
         condition: service_healthy
+      kafka-setup:
+        condition: service_completed_successfully
     networks:
       - modapto
 
@@ -335,19 +340,52 @@ services:
       - ${OSC_APP_PORT}:8080
     labels:
       - traefik.enable=true
-      - traefik.http.routers.orchestrator=true
-      - traefik.http.routers.orchestrator.rule=Host(`${SERVICES_GATEWAY_URL}`) && (PathPrefix(`/micro-service-controller-rest`) || PathPrefix(`/catalog`))
-      - traefik.http.routers.orchestrator.tls=true
-      - traefik.http.routers.orchestrator.tls.certresolver=lets-encrypt
+      - traefik.http.routers.orchestrator-with-service-catalogue=true
+      - traefik.http.routers.orchestrator-with-service-catalogue.rule=Host(`${SERVICES_GATEWAY_URL}`) && (PathPrefix(`/micro-service-controller-rest`) || PathPrefix(`/catalog`))
+      - traefik.http.routers.orchestrator-with-service-catalogue.tls=true
+      - traefik.http.routers.orchestrator-with-service-catalogue.tls.certresolver=lets-encrypt
       - traefik.http.middlewares.securityHeader.headers.sslredirect=true
-      - traefik.http.routers.orchestrator.middlewares=securityHeader
-      - traefik.http.services.orchestrator.loadbalancer.server.port=8080
+      - traefik.http.routers.orchestrator-with-service-catalogue.middlewares=securityHeader
+      - traefik.http.services.orchestrator-with-service-catalogue.loadbalancer.server.port=8080
     networks:
       - modapto
 
   ###################################################
   # DT Management Component
   ###################################################
+  digital-twin-management:
+    image: ${DTM_APP_IMAGE}
+    container_name: digital-twin-management
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - SERVICE_CATALOG_URL=http://orchestrator-with-service-catalogue:8080
+      - MESSAGEBUS_KAFKA_URL=kafka:${KAFKA_EXTERNAL_PORT}
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - DT_DOCKER_REGISTRY_URL=${CONTAINER_REGISTRY}
+      - DT_DOCKER_REGISTRY_USERNAME=${CONTAINER_REGISTRY_USERNAME}
+      - DT_DOCKER_REGISTRY_PASSWORD=${CONTAINER_REGISTRY_PASSWORD}
+      - DT_DOCKER_IMAGE=${DT_APP_IMAGE}
+      - INTERNAL_SERVICE_DOCKER_REGISTRY_URL=${CONTAINER_REGISTRY}
+      - INTERNAL_SERVICE_DOCKER_REGISTRY_USERNAME=${CONTAINER_REGISTRY_USERNAME}
+      - INTERNAL_SERVICE_DOCKER_REGISTRY_PASSWORD=${CONTAINER_REGISTRY_PASSWORD}
+      - DTM_KAFKA_QUEUE_SIZE=100
+      - DTM_KAFKA_THREAD_COUNT=1
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - ${DTM_APP_PORT}:8080
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.digital-twin-management=true
+      - traefik.http.routers.digital-twin-management.rule=Host(`${DIGITAL_TWIN_GATEWAY_URL}`)
+      - traefik.http.routers.digital-twin-management.tls=true
+      - traefik.http.routers.digital-twin-management.tls.certresolver=lets-encrypt
+      - traefik.http.middlewares.securityHeader.headers.sslredirect=true
+      - traefik.http.routers.digital-twin-management.middlewares=securityHeader
+      - traefik.http.services.digital-twinv.loadbalancer.server.port=8080
+    networks:
+      - modapto
 
   ###################################################
   # Evaluation Decision Support Component
@@ -406,20 +444,21 @@ services:
   ###################################################
   kafka:
     image: confluentinc/cp-kafka:${KAFKA_IMAGE_VERSION}
+    build: .
     hostname: kafka
     container_name: kafka
     restart: unless-stopped
     volumes:
       - kafka-data:/var/lib/kafka/data
       - kafka-config:/etc/kafka
-      - kafka-schemas:/etc/schema-registr
+      - kafka-schemas:/etc/schema-registry
     ports:
       - "29092:29092"
       - "9101:9101"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://:${KAFKA_INTERNAL_PORT},PLAINTEXT_HOST://${KAFKA_GATEWAY_URL}:${KAFKA_EXTERNAL_PORT}'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:${KAFKA_INTERNAL_PORT},PLAINTEXT_HOST://${KAFKA_GATEWAY_URL}:${KAFKA_EXTERNAL_PORT}'
       KAFKA_CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: 'kafka:${KAFKA_EXTERNAL_PORT}'
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
@@ -465,6 +504,8 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: 'kafka:${KAFKA_INTERNAL_PORT}'
       KAFKA_CLUSTERS_0_METRICS_PORT: 9101
       KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:${SR_EXTERNAL_PORT}
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_USERNAME: ${SR_USERNAME}
+      KAFKA_CLUSTERS_0_SCHEMAREGISTRYAUTH_PASSWORD: ${SR_PASSWORD}
       AUTH_TYPE: "LOGIN_FORM"
       SPRING_SECURITY_USER_NAME: ${KAFKA_UI_USERNAME}
       SPRING_SECURITY_USER_PASSWORD: ${KAFKA_UI_PASSWORD}
@@ -482,8 +523,6 @@ services:
         condition: service_healthy
       schema-registry:
         condition: service_started
-    volumes:
-      - ./kafka-ui/config-single-broker.yaml:/etc/kafkaui/dynamic_config.yaml
     networks:
       - modapto
       - kafka
@@ -543,6 +582,7 @@ services:
       SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: INFO
     networks:
       - kafka
+      - modapto
 
   # Initial Topics Setup
   kafka-setup:
@@ -553,7 +593,7 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
-    volumes:
+    volumes: # Change the topics / Kafka Broker URL inside the script
       - ./message-bus/scripts/kafka-init-topics-single-broker.sh:/usr/local/bin/kafka-init-topics.sh
     environment:
       KAFKA_NODE_ID: 10
@@ -570,6 +610,7 @@ services:
       '
     networks:
       - kafka
+      - modapto
 
   # Kafka Connector to support MQTT configuration
   kafka-connect:
@@ -607,16 +648,18 @@ services:
       CONNECT_CONFIG_PROVIDERS_ENV_CLASS: 'org.apache.kafka.common.config.provider.EnvVarConfigProvider'
       MQTT_USER: ${MQTT_USER}
       MQTT_PASSWORD: ${MQTT_PASSWORD}
+      MQTT_URL: tcp://mosquitto:1883
     volumes:
       - ./message-bus/kafka-connect/mqtt-source-connector.json:/etc/kafka-connect/mqtt-source-connector.json
       - kafka_connect_plugins:/usr/share/confluent-hub-components
     networks:
       - kafka
+      - modapto
     depends_on:
       kafka:
         condition: service_healthy
       mosquitto:
-        condition: service_started
+        condition: service_healthy
     command:
       - bash
       - -c
@@ -626,6 +669,7 @@ services:
         #
         echo "Launching Kafka Connect worker"
         /etc/confluent/docker/run &
+        sleep 10
         #
         echo "Waiting for Kafka Connect to be ready..."
         while ! curl -s -f http://localhost:${KC_EXTERNAL_PORT}/connector-plugins > /dev/null; do
@@ -650,15 +694,17 @@ services:
       - MOSQUITTO_USERNAME=${MQTT_USER}
       - MOSQUITTO_PASSWORD=${MQTT_PASSWORD}
     volumes:
-      - ./message-bus/mqtt-config:/mosquitto/config
+      - ./message-bus/mqtt/config:/mosquitto/config
       - mosquitto_data:/mosquitto/data
       - mosquitto_log:/mosquitto/log
-    # healthcheck:
-    #   test: ["CMD-SHELL", "timeout 5 mosquitto_sub -t 'test-topic' -u ${MQTT_USER} -P ${MQTT_PASSWORD} -E -v 2>&1 || exit 1"]
-    #   interval: 20s
-    #   timeout: 10s
-    #   retries: 3
-    #   start_period: 10s
+    healthcheck:
+      test: ["CMD-SHELL", "timeout 5 mosquitto_sub -t 'test-topic' -u ${MQTT_USER} -P ${MQTT_PASSWORD} -E -v 2>&1 || exit 1"]
+      interval: 20s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    command: >
+      sh -c "mosquitto_passwd -b /mosquitto/config/passwd $MQTT_USER $MQTT_PASSWORD && exec /usr/sbin/mosquitto -c /mosquitto/config/mosquitto.conf"
     labels:
       - traefik.enable=true
       - traefik.tcp.routers.mosquitto.rule=HostSNI(`${MQTT_GATEWAY_URL}`)
