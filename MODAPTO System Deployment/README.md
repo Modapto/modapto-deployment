@@ -77,7 +77,7 @@ All MODAPTO components are authenticated and authrorized via Identity Manager. H
 5. Regenerate a new Token
 6. Copy its value and add it to ***.env*** file in the specified variable
 
-![Generate Token](https://raw.githubusercontent.com/Modapto/modapto-deployment/main/MODAPTO%20System%20Deployment/resources/Generate_Token.png)
+![Generate Token](https://github.com/Modapto/modapto-deployment/blob/main/MODAPTO%20System%20Deployment/resources/Generate_Token.png)
 
 Additionally, its highly suggested to add the Super Admin of the System via the following process:
 
@@ -91,7 +91,7 @@ Additionally, its highly suggested to add the Super Admin of the System via the 
 8. Press "Import"
 9. Change Super-Admins password in Users Tab, select the User and navigate to Credentials to setup a new password
 
-![Create Super Admin](https://raw.githubusercontent.com/Modapto/modapto-deployment/main/MODAPTO%20System%20Deployment/resources/Import_User.png)
+![Create Super Admin](https://github.com/Modapto/modapto-deployment/blob/main/MODAPTO%20System%20Deployment/resources//Import_User.png)
 
 ### Step 3: Deploy MODAPTO System
 
